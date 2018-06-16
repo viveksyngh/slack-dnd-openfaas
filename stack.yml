@@ -1,0 +1,36 @@
+provider:
+  name: faas
+  gateway: http://127.0.0.1:8080
+
+functions:
+  dnd-info:
+    lang: go
+    handler: ./dnd-info
+    image: viveksyngh/dnd-info
+    environment:
+      combine_output: false
+    environment_file:
+    - env.yml
+
+  end-dnd:
+    lang: go
+    handler: ./end-dnd
+    image: viveksyngh/end-dnd
+    environment:
+      combine_output: false
+    environment_file:
+    - env.yml
+
+  set-snooze:
+    lang: go
+    handler: ./set-snooze
+    image: viveksyngh/set-snooze
+    environment:
+      combine_output: false
+    environment_file:
+    - env.yml
+
+  # end-snooze:
+  #   lang: go
+  #   handler: ./end-snooze
+  #   image: viveksyngh/end-snooze
