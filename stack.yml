@@ -30,7 +30,11 @@ functions:
     environment_file:
     - env.yml
 
-  # end-snooze:
-  #   lang: go
-  #   handler: ./end-snooze
-  #   image: viveksyngh/end-snooze
+  end-snooze:
+    lang: go
+    handler: ./end-snooze
+    image: viveksyngh/end-snooze
+    environment:
+      combine_output: false
+    environment_file:
+    - env.yml
