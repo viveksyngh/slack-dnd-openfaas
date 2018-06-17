@@ -1,10 +1,12 @@
 package function
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 //Response response format for slack API
@@ -22,13 +24,23 @@ type Request struct {
 	QueryResult QueryResult `json:"queryResult"`
 }
 
+type Duration struct {
+	Amount float32 `json:"amount"`
+	Unit   string  `json:"unit"`
+}
+
+type Parameters struct {
+	Duration Duration `json:"duration"`
+}
+
 type QueryResult struct {
-	QueryText                 string  `json:"queryText"`
-	AllRequiredParamsPresent  bool    `json:"allRequiredParamsPresent"`
-	Intent                    Intent  `json:"intent"`
-	IntentDetectionConfidence float32 `json:"intentDetectionConfidence"`
-	LanguageCode              string  `json:"languageCode"`
-	Session                   string  `json:"session"`
+	QueryText                 string     `json:"queryText"`
+	AllRequiredParamsPresent  bool       `json:"allRequiredParamsPresent"`
+	Intent                    Intent     `json:"intent"`
+	IntentDetectionConfidence float32    `json:"intentDetectionConfidence"`
+	LanguageCode              string     `json:"languageCode"`
+	Session                   string     `json:"session"`
+	Parameters                Parameters `json:"parameters"`
 }
 
 // Handle a serverless request
@@ -42,17 +54,30 @@ func Handle(req []byte) string {
 		return "Unable to parse requets"
 
 	}
-	gateway_hostname := os.Getenv("gateway_hostname")
-	if gateway_hostname == "" {
-		gateway_hostname = "gateway"
+	gatewayHostname := os.Getenv("gateway_hostname")
+	if gatewayHostname == "" {
+		gatewayHostname = "gateway"
 	}
 	var response Response
 	var res *http.Response
 
 	if requestPayload.QueryResult.Intent.DisplayName == "dnd_info" {
-		res, err = http.Get("http://" + gateway_hostname + ":8080/function/dnd-info")
+		res, err = http.Get("http://" + gatewayHostname + ":8080/function/dnd-info")
 	} else if requestPayload.QueryResult.Intent.DisplayName == "end_dnd" {
-		res, err = http.Get("http://" + gateway_hostname + ":8080/function/end-dnd")
+		res, err = http.Get("http://" + gatewayHostname + ":8080/function/end-dnd")
+	} else if requestPayload.QueryResult.Intent.DisplayName == "set_snooze" {
+
+		duration := int(requestPayload.QueryResult.Parameters.Duration.Amount)
+		if requestPayload.QueryResult.Parameters.Duration.Unit == "s" {
+			duration = int(duration / 60)
+		} else if requestPayload.QueryResult.Parameters.Duration.Unit == "h" {
+			duration = duration * 60
+		}
+		reader := bytes.NewReader([]byte(strconv.Itoa(duration)))
+
+		res, err = http.Post("http://"+gatewayHostname+":8080/function/set-snooze", "text/plain", reader)
+	} else if requestPayload.QueryResult.Intent.DisplayName == "end_snooze" {
+		res, err = http.Get("http://" + gatewayHostname + ":8080/function/end-snooze")
 	} else {
 		response = Response{FulfillmentText: "Sorry, I can not do that right now, I am still learning."}
 	}
