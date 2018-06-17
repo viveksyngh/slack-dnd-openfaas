@@ -38,3 +38,10 @@ functions:
       combine_output: false
     environment_file:
     - env.yml
+
+  api-webhook:
+    lang: go
+    handler: ./api-webhook
+    image: viveksyngh/api-webhook
+    environment:
+      combine_output: false

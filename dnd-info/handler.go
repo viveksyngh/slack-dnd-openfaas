@@ -22,6 +22,7 @@ func Handle(req []byte) string {
 		os.Stderr.WriteString("Slack token is not set")
 		return ""
 	}
+	os.Stderr.WriteString(string(req))
 	URL = URL + "?token=" + slackToken
 
 	res, err := http.Get(URL)
