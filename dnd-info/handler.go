@@ -2,6 +2,7 @@ package function
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -9,9 +10,10 @@ import (
 
 //Response response format for slack API
 type Response struct {
-	OK            bool `json:"ok"`
-	DNDEnabled    bool `json:"dnd_enabled"`
-	SnoozeEnabled bool `json:"snooze_enabled"`
+	OK              bool `json:"ok"`
+	DNDEnabled      bool `json:"dnd_enabled"`
+	SnoozeEnabled   bool `json:"snooze_enabled"`
+	SnoozeRemaining int  `json:"snooze_remaining"`
 }
 
 // Handle a serverless request
@@ -33,12 +35,24 @@ func Handle(req []byte) string {
 	if res.StatusCode == 200 {
 		defer res.Body.Close()
 		responseBytes, _ := ioutil.ReadAll(res.Body)
+		os.Stderr.WriteString(string(responseBytes))
 		var resp Response
 		err = json.Unmarshal(responseBytes, &resp)
+		var responseMessage string
 		if resp.DNDEnabled == true {
-			return "You have DND enabled."
+			responseMessage = "You have DND enabled."
+		} else {
+			responseMessage = "You do not have DND enabled."
 		}
-		return "You do not have DnD enabled."
+
+		if resp.SnoozeEnabled == true {
+			minutes := resp.SnoozeRemaining / 60
+			seconds := resp.SnoozeRemaining % 60
+			responseMessage = responseMessage + fmt.Sprintf("You also have active snooze notifications which will end in %d minutes and %d seconds.", minutes, seconds)
+		} else {
+			responseMessage = responseMessage + "You don't have active snooze notifications."
+		}
+		return responseMessage
 	}
 	return "Something went wrong."
 }

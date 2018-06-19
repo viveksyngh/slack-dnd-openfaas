@@ -54,30 +54,38 @@ func Handle(req []byte) string {
 		return "Unable to parse requets"
 
 	}
+
 	gatewayHostname := os.Getenv("gateway_hostname")
 	if gatewayHostname == "" {
 		gatewayHostname = "gateway"
 	}
+
 	var response Response
 	var res *http.Response
+	intentName := requestPayload.QueryResult.Intent.DisplayName
 
-	if requestPayload.QueryResult.Intent.DisplayName == "dnd_info" {
+	if intentName == "dnd_info" {
 		res, err = http.Get("http://" + gatewayHostname + ":8080/function/dnd-info")
-	} else if requestPayload.QueryResult.Intent.DisplayName == "end_dnd" {
-		res, err = http.Get("http://" + gatewayHostname + ":8080/function/end-dnd")
-	} else if requestPayload.QueryResult.Intent.DisplayName == "set_snooze" {
 
+	} else if intentName == "end_dnd" {
+		res, err = http.Get("http://" + gatewayHostname + ":8080/function/end-dnd")
+
+	} else if intentName == "set_snooze" {
+		unit := requestPayload.QueryResult.Parameters.Duration.Unit
 		duration := int(requestPayload.QueryResult.Parameters.Duration.Amount)
-		if requestPayload.QueryResult.Parameters.Duration.Unit == "s" {
+
+		if unit == "s" {
 			duration = int(duration / 60)
-		} else if requestPayload.QueryResult.Parameters.Duration.Unit == "h" {
+		} else if unit == "h" {
 			duration = duration * 60
 		}
 		reader := bytes.NewReader([]byte(strconv.Itoa(duration)))
 
 		res, err = http.Post("http://"+gatewayHostname+":8080/function/set-snooze", "text/plain", reader)
-	} else if requestPayload.QueryResult.Intent.DisplayName == "end_snooze" {
+
+	} else if intentName == "end_snooze" {
 		res, err = http.Get("http://" + gatewayHostname + ":8080/function/end-snooze")
+
 	} else {
 		response = Response{FulfillmentText: "Sorry, I can not do that right now, I am still learning."}
 	}
