@@ -57,7 +57,7 @@ func Handle(req []byte) string {
 
 	gatewayHostname := os.Getenv("gateway_hostname")
 	if gatewayHostname == "" {
-		gatewayHostname = "gateway"
+		gatewayHostname = "gateway.openfaas"
 	}
 
 	var response Response

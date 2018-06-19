@@ -53,4 +53,4 @@ functions:
     image: viveksyngh/api-webhook
     environment:
       combine_output: false
-      gateway_hostname: gateway.openfaas
+      gateway_hostname: "gateway.openfaas"
