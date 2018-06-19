@@ -55,9 +55,9 @@ func Handle(req []byte) string {
 
 	}
 
-	gatewayHostname := os.Getenv("gateway_hostname")
+	gatewayHostname := os.Getenv("gateway_url")
 	if gatewayHostname == "" {
-		gatewayHostname = "gateway.openfaas"
+		gatewayHostname = "http://gateway:8080"
 	}
 
 	var response Response
@@ -65,10 +65,10 @@ func Handle(req []byte) string {
 	intentName := requestPayload.QueryResult.Intent.DisplayName
 
 	if intentName == "dnd_info" {
-		res, err = http.Get("http://" + gatewayHostname + ":8080/function/dnd-info")
+		res, err = http.Get(gatewayHostname + "/function/dnd-info")
 
 	} else if intentName == "end_dnd" {
-		res, err = http.Get("http://" + gatewayHostname + ":8080/function/end-dnd")
+		res, err = http.Get(gatewayHostname + "/function/end-dnd")
 
 	} else if intentName == "set_snooze" {
 		unit := requestPayload.QueryResult.Parameters.Duration.Unit
@@ -81,10 +81,10 @@ func Handle(req []byte) string {
 		}
 		reader := bytes.NewReader([]byte(strconv.Itoa(duration)))
 
-		res, err = http.Post("http://"+gatewayHostname+":8080/function/set-snooze", "text/plain", reader)
+		res, err = http.Post(gatewayHostname+"/function/set-snooze", "text/plain", reader)
 
 	} else if intentName == "end_snooze" {
-		res, err = http.Get("http://" + gatewayHostname + ":8080/function/end-snooze")
+		res, err = http.Get(gatewayHostname + "/function/end-snooze")
 
 	} else {
 		response = Response{FulfillmentText: "Sorry, I can not do that right now, I am still learning."}
