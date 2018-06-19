@@ -2,6 +2,7 @@ package function
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -15,6 +16,14 @@ type Response struct {
 func Handle(req []byte) string {
 	URL := "https://slack.com/api/dnd.endDnd"
 	slackToken := os.Getenv("slack_token")
+	if slackToken == "" {
+		slackTokenBytes, err := ioutil.ReadFile("/var/openfaas/secrets/slack-token")
+		slackToken = string(slackTokenBytes)
+		if err != nil {
+			return fmt.Sprintf("Unable to read secret file")
+		}
+	}
+
 	if slackToken == "" {
 		os.Stderr.WriteString("Slack token is not set")
 		return ""

@@ -11,6 +11,8 @@ functions:
       combine_output: false
     environment_file:
     - env.yml
+    secrets:
+      - slack-secrets
 
   end-dnd:
     lang: go
@@ -20,6 +22,8 @@ functions:
       combine_output: false
     environment_file:
     - env.yml
+    secrets:
+      - slack-secrets
 
   set-snooze:
     lang: go
@@ -29,6 +33,8 @@ functions:
       combine_output: false
     environment_file:
     - env.yml
+    secrets:
+      - slack-secrets
 
   end-snooze:
     lang: go
@@ -38,6 +44,8 @@ functions:
       combine_output: false
     environment_file:
     - env.yml
+    secrets:
+      - slack-secrets
 
   api-webhook:
     lang: go
